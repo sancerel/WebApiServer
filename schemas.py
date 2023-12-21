@@ -7,14 +7,13 @@ class EmptyProfile(BaseModel):
     profile_description: str | None = None
 
 
-
 class ProfileCreate(EmptyProfile):
     pass
 
 
 class UserProfile(EmptyProfile):
     id: int
-    profile_id: int
+    owner_id: int
 
     class Config:
         from_attributes = True
@@ -29,10 +28,22 @@ class UserCreate(UserBase):
     password: str
 
 
-
 class User(UserBase):
     id: int
     profile: list[UserProfile] = []
 
     class Config:
         from_attributes = True
+
+
+# class RoleBase(BaseModel):
+#     id: int
+#     role_id: int
+#
+#     class Config:
+#         from_attributes = True
+#
+#
+# class CreateRole(RoleBase):
+#     nane: str
+#     permissions: str

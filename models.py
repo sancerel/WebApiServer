@@ -3,18 +3,22 @@ from sqlalchemy.orm import relationship
 
 import database
 
-class Roles(database.Base):
-    __tablename__ = "roles"
-    users = relationship("Task", back_populates="users")
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    permissions = Column(String, nullable=False)
+# class Roles(database.Base):
+#     __tablename__ = "roles"
+#     owner = relationship("User", back_populates="role")
+#
+#     id = Column(Integer, primary_key=True, index=True)
+#     owner_id = Column(Integer, ForeignKey("users.id"))
+#
+#     name = Column(String, nullable=False)
+#     permissions = Column(String, nullable=False)
 
 
 class User(database.Base):
     __tablename__ = "users"
-    profiles = relationship("Task", back_populates="profiles")
+
+    profile = relationship("UserProfile", back_populates="owner")
+    # role = relationship("Roles", back_populates="owner")
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, nullable=False)
@@ -24,12 +28,12 @@ class User(database.Base):
 
 class UserProfile(database.Base):
     __tablename__ = "profiles"
-    roles = relationship("Task", back_populates="roles")
+    owner = relationship("User", back_populates="profile")
 
     id = Column(Integer, primary_key=True, index=True)
-    fist_name = Column(String, nullable=False)
-    last_name = Column(String, nullable=False)
-    permissions = Column(String, nullable=False)
-    profile_description = Column(String)
+    owner_id = Column(Integer, ForeignKey("users.id"))
 
-
+    fist_name = Column(String, index=True)
+    last_name = Column(String, index=True)
+    permissions = Column(String, index=True)
+    # profile_description = Column(String, index=True)
