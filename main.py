@@ -30,57 +30,6 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-
-@app.get("/")
-async def get():
-    return HTMLResponse(html)
-
-html = """
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>WebApi</title>
-        <script src="jquery-3.7.1.min.js"></script>
-    </head>
-    <body>
-        <form method="post" action="http://127.0.0.1:8000/users/create" onsubmit="">
-          <div>
-            <h1>Register User</h1>
-            <p>Please fill in this form to create an account.</p>
-            <hr>
-            <label><b>Email</b></label>
-            <input type="text" name="email" id="email" required>
-            <label><b>Username</b></label>
-            <input type="text" name="username" id="username" required>
-            <label><b>Password</b></label>
-            <input type="password" name="password" id="psw" required>
-            <hr>
-            <button type="submit">Register</button>
-          </div>
-        </form>
-        <ul id='users'>
-        </ul>
-        <script>
-            var ws = new WebSocket("ws://localhost:8000/ws");
-            ws.onmessage = function(event) {
-                var users = document.getElementById('users')
-                var user = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                user.appendChild(content)
-                users.appendChild(user)
-            };
-            function sendMessage(event) {
-                var email = document.getElementById("email")
-                var userName = document.getElementById("username")
-                var password = document.getElementById("psw")
-                ws.send("Пользователь создан")
-                email.value = ''
-                event.preventDefault()
-            }
-        </script>
-    </body>
-</html>
-"""
 #read
 @app.get("/profiles/take/all")
 def read_profiles(request: Request, db: Session = Depends(get_db)):
@@ -101,6 +50,7 @@ async def create_profile(user_id: str, profile: schemas.ProfileCreate, response:
     try:
         crud.create_user_profile(db=db, profile=profile, user_id=user_id)
         response.status_code = status.HTTP_200_OK
+        await send_notification("Профиль создан")
     except:
         response.status_code = status.HTTP_404_NOT_FOUND
     return response
@@ -116,6 +66,7 @@ async def create_role(user_id: str, role: schemas.RoleCreate, response: Response
     try:
         crud.create_user_role(db=db, role=role, user_id=user_id)
         response.status_code = status.HTTP_200_OK
+        await send_notification("Роль создана")
     except:
         response.status_code = status.HTTP_404_NOT_FOUND
     return response
@@ -130,6 +81,7 @@ async def create_user(user: schemas.UserCreate, response: Response, db: Session 
     try:
         crud.create_user(db=db, user=user)
         response.status_code = status.HTTP_200_OK
+        await send_notification("Пользователь создан")
     except:
         response.status_code = status.HTTP_404_NOT_FOUND
     return response
@@ -147,6 +99,7 @@ async def delete_profile(profile_id: str, response: Response, db: Session = Depe
     try:
         crud.delete_profile_by_id(db=db, profile_id=profile_id)
         response.status_code = status.HTTP_200_OK
+        await send_notification("Профиль удалён")
     except:
         response.status_code = status.HTTP_404_NOT_FOUND
     return response
@@ -162,6 +115,7 @@ async def delete_role(role_id: str, response: Response, db: Session = Depends(ge
     try:
         crud.delete_role_by_id(db=db, role_id=role_id)
         response.status_code = status.HTTP_200_OK
+        await send_notification("Роль удалёна")
     except:
         response.status_code = status.HTTP_404_NOT_FOUND
     return response
@@ -191,6 +145,7 @@ async def update_profile(profile_id: str, profile: schemas.ProfileCreate, respon
     try:
         crud.update_profile_by_id(db, profile_id, profile)
         response.status_code = status.HTTP_200_OK
+        await send_notification("Профиль обновлён")
     except:
         response.status_code = status.HTTP_404_NOT_FOUND
 
@@ -206,6 +161,7 @@ async def update_role(role_id: str, role: schemas.RoleCreate, response: Response
     try:
         crud.update_role_by_id(db, role_id, role)
         response.status_code = status.HTTP_200_OK
+        await send_notification("Роль обновлена")
     except:
         response.status_code = status.HTTP_404_NOT_FOUND
 
@@ -213,6 +169,8 @@ async def update_role(role_id: str, role: schemas.RoleCreate, response: Response
 
 
 connected_clients = []
+
+
 async def send_notification(message):
     for client in connected_clients:
         await client.send_text(message)
