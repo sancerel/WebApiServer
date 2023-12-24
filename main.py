@@ -177,7 +177,6 @@ async def send_notification(message):
 
 
 
-
 #Websockets
 @app.websocket('/ws')
 async def websocket_endpoint(websocket: WebSocket):
