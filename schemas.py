@@ -11,7 +11,24 @@ class ProfileCreate(EmptyProfile):
     pass
 
 
-class UserProfile(EmptyProfile):
+class Profile(EmptyProfile):
+    id: int
+    owner_id: int
+
+    class Config:
+        from_attributes = True
+
+
+class EmptyRole(BaseModel):
+    name: str
+    permissions: str
+
+
+class RoleCreate(EmptyRole):
+    pass
+
+
+class Role(EmptyRole):
     id: int
     owner_id: int
 
@@ -30,20 +47,9 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    profile: list[UserProfile] = []
+    profiles: list[Profile] = []
+    role: list[Role] = []
 
     class Config:
         from_attributes = True
 
-
-# class RoleBase(BaseModel):
-#     id: int
-#     role_id: int
-#
-#     class Config:
-#         from_attributes = True
-#
-#
-# class CreateRole(RoleBase):
-#     nane: str
-#     permissions: str
