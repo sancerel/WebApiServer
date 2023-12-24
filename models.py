@@ -15,6 +15,7 @@ class User(database.Base):
     password = Column(String, index=True)
 
 
+
 class Profile(database.Base):
     __tablename__ = "profiles"
     owner = relationship("User", back_populates="profiles")
